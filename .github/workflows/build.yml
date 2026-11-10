@@ -54,11 +54,21 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build | tee xcodebuild.log
 
+      - name: Prepare Xcode dylib artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          XCODE_DYLIB="build/Build/Products/Release-iphoneos/RoboIOS3105Dylib.dylib"
+          test -f "$XCODE_DYLIB"
+          cp "$XCODE_DYLIB" "artifacts/RoboIOS3105Dylib.xcode.dylib"
+          file "artifacts/RoboIOS3105Dylib.xcode.dylib"
+          ls -lh "artifacts/RoboIOS3105Dylib.xcode.dylib"
+
       - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
           name: ROBO-iOS-3105-dylib
           path: |
-            artifacts/RoboIOS3105Dylib.dylib
+            artifacts/RoboIOS3105Dylib.xcode.dylib
             xcodebuild.log
           if-no-files-found: error
