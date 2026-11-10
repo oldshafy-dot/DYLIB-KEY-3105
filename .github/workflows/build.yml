@@ -1,4 +1,4 @@
-name: iOS Build
+name: iOS Dylib Build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build ROBO iOS 3105
+    name: Build ROBO iOS 3105 Dylib
     runs-on: macos-15
 
     steps:
@@ -18,7 +18,30 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Build unsigned iOS app
+      - name: Build dynamic library
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build artifacts
+          mkdir -p artifacts
+
+          SDK_PATH="$(xcrun --sdk iphoneos --show-sdk-path)"
+
+          xcrun swiftc \
+            -sdk "$SDK_PATH" \
+            -target arm64-apple-ios16.0 \
+            -emit-library \
+            -module-name RoboIOS3105Dylib \
+            -O \
+            -o "artifacts/RoboIOS3105Dylib.dylib" \
+            RoboIOS3105/DylibEntry.swift
+
+          test -f "artifacts/RoboIOS3105Dylib.dylib"
+          file "artifacts/RoboIOS3105Dylib.dylib"
+          ls -lh artifacts/RoboIOS3105Dylib.dylib
+
+      - name: Build Xcode dylib target
+        shell: bash
         run: |
           set -o pipefail
           xcodebuild \
@@ -31,13 +54,11 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             build | tee xcodebuild.log
 
-      - name: Find built app
-        run: |
-          find build -type f -name "*.dylib" -print
-
-      - name: Upload build artifact
+      - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
           name: ROBO-iOS-3105-dylib
-          path: build/Build/Products/Release-iphoneos/*.dylib
+          path: |
+            artifacts/RoboIOS3105Dylib.dylib
+            xcodebuild.log
           if-no-files-found: error
