@@ -23,7 +23,7 @@ jobs:
           set -o pipefail
           xcodebuild \
             -project RoboIOS3105.xcodeproj \
-            -scheme RoboIOS3105 \
+            -scheme RoboIOS3105Dylib \
             -sdk iphoneos \
             -configuration Release \
             -derivedDataPath build \
@@ -33,11 +33,11 @@ jobs:
 
       - name: Find built app
         run: |
-          find build -type d -name "*.app" -print
+          find build -type f -name "*.dylib" -print
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ROBO-iOS-3105-unsigned
-          path: build/Build/Products/Release-iphoneos/*.app
+          name: ROBO-iOS-3105-dylib
+          path: build/Build/Products/Release-iphoneos/*.dylib
           if-no-files-found: error
