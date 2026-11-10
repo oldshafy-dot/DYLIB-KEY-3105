@@ -17,6 +17,8 @@
     A10000000000000000000008 /* DylibEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DylibEntry.swift */; };
     A10000000000000000000009 /* DylibEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* DylibEntry.m */; };
     A1000000000000000000000A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* UIKit.framework */; };
+    A1000000000000000000000B /* DylibEntry.swift in App Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* DylibLoader.swift */; };
+    A1000000000000000000000C /* RoboIOS3105Dylib.dylib in Embed */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* RoboIOS3105Dylib.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,7 @@
     B10000000000000000000011 /* DylibEntry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DylibEntry.m; sourceTree = "<group>"; };
     B10000000000000000000010 /* RoboIOS3105Dylib.dylib */ = {isa = PBXFileReference; explicitFileType = compiled.mach-o.dylib; includeInIndex = 0; path = RoboIOS3105Dylib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
     B10000000000000000000012 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+    B10000000000000000000013 /* DylibLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DylibLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +51,17 @@
       files = (
         A1000000000000000000000A /* UIKit.framework in Frameworks */,
       );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+    C10000000000000000000003 /* Embed Dylib */ = {
+      isa = PBXCopyFilesBuildPhase;
+      buildActionMask = 2147483647;
+      dstPath = "";
+      dstSubfolderSpec = 10;
+      files = (
+        A1000000000000000000000C /* RoboIOS3105Dylib.dylib in Embed */,
+      );
+      name = "Embed Dylib";
       runOnlyForDeploymentPostprocessing = 0;
     };
 /* End PBXFrameworksBuildPhase section */
@@ -96,10 +110,12 @@
         D20000000000000000000001 /* Sources */,
         C10000000000000000000001 /* Frameworks */,
         D20000000000000000000002 /* Resources */,
+        C10000000000000000000003 /* Embed Dylib */,
       );
       buildRules = (
       );
       dependencies = (
+        D40000000000000000000001 /* RoboIOS3105Dylib */,
       );
       name = RoboIOS3105;
       productName = RoboIOS3105;
@@ -166,6 +182,18 @@
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
+    D40000000000000000000001 /* RoboIOS3105Dylib */ = {
+      isa = PBXTargetDependency;
+      target = D10000000000000000000002 /* RoboIOS3105Dylib */;
+      targetProxy = D50000000000000000000001;
+    };
+    D50000000000000000000001 = {
+      isa = PBXContainerItemProxy;
+      containerPortal = E10000000000000000000001 /* Project object */;
+      proxyType = 1;
+      remoteGlobalIDString = D10000000000000000000002;
+      remoteInfo = RoboIOS3105Dylib;
+    };
     D20000000000000000000003 /* Dylib Sources */ = {
       isa = PBXSourcesBuildPhase;
       buildActionMask = 2147483647;
@@ -183,6 +211,7 @@
       buildActionMask = 2147483647;
       files = (
         A10000000000000000000001 /* App.swift in Sources */,
+        A1000000000000000000000B /* DylibLoader.swift in App Sources */,
         A10000000000000000000002 /* RootView.swift in Sources */,
         A10000000000000000000003 /* LicenseView.swift in Sources */,
         A10000000000000000000004 /* LicenseManager.swift in Sources */,
