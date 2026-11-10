@@ -15,6 +15,8 @@
     A10000000000000000000006 /* StarFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* StarFieldView.swift */; };
     A10000000000000000000007 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* Info.plist */; };
     A10000000000000000000008 /* DylibEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DylibEntry.swift */; };
+    A10000000000000000000009 /* DylibEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* DylibEntry.m */; };
+    A1000000000000000000000A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* UIKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
     B10000000000000000000006 /* StarFieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarFieldView.swift; sourceTree = "<group>"; };
     B10000000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
     B10000000000000000000008 /* RoboIOS3105.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ROBO iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+    B10000000000000000000011 /* DylibEntry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DylibEntry.m; sourceTree = "<group>"; };
+    B10000000000000000000012 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +37,7 @@
       isa = PBXFrameworksBuildPhase;
       buildActionMask = 2147483647;
       files = (
+        A1000000000000000000000A /* UIKit.framework in Frameworks */,
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
@@ -58,6 +63,7 @@
         B10000000000000000000006 /* StarFieldView.swift */,
         B10000000000000000000007 /* Info.plist */,
         B10000000000000000000009 /* DylibEntry.swift */,
+        B10000000000000000000011 /* DylibEntry.m */,
       );
       path = RoboIOS3105;
       sourceTree = "<group>";
@@ -95,6 +101,7 @@
       isa = PBXNativeTarget;
       buildConfigurationList = D30000000000000000000002 /* Build configuration list for PBXNativeTarget "RoboIOS3105Dylib" */;
       buildPhases = (
+        C10000000000000000000001 /* Frameworks */,
         D20000000000000000000003 /* Dylib Sources */,
       );
       buildRules = (
@@ -155,6 +162,7 @@
       buildActionMask = 2147483647;
       files = (
         A10000000000000000000008 /* DylibEntry.swift in Sources */,
+        A10000000000000000000009 /* DylibEntry.m in Sources */,
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
@@ -291,6 +299,8 @@
         DYLIB_CURRENT_VERSION = 1;
         IPHONEOS_DEPLOYMENT_TARGET = 16.0;
         MACH_O_TYPE = mh_dylib;
+        DEFINES_MODULE = YES;
+        CLANG_ENABLE_MODULES = YES;
         PRODUCT_NAME = RoboIOS3105Dylib;
         SDKROOT = iphoneos;
         SWIFT_VERSION = 5.0;
