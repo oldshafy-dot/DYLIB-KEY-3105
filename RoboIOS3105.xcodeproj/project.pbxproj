@@ -14,7 +14,7 @@
     A10000000000000000000005 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* KeychainStore.swift */; };
     A10000000000000000000006 /* StarFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* StarFieldView.swift */; };
     A10000000000000000000007 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* Info.plist */; };
-    A10000000000000000000008 /* DylibEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DylibEntry.swift */; };
+    A10000000000000000000008 /* DylibEntry.c in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DylibEntry.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,7 +57,7 @@
         B10000000000000000000005 /* KeychainStore.swift */,
         B10000000000000000000006 /* StarFieldView.swift */,
         B10000000000000000000007 /* Info.plist */,
-        B10000000000000000000009 /* DylibEntry.swift */,
+        B10000000000000000000009 /* DylibEntry.c */,
       );
       path = RoboIOS3105;
       sourceTree = "<group>";
@@ -154,7 +154,7 @@
       isa = PBXSourcesBuildPhase;
       buildActionMask = 2147483647;
       files = (
-        A10000000000000000000008 /* DylibEntry.swift in Sources */,
+        A10000000000000000000008 /* DylibEntry.c in Sources */,
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
