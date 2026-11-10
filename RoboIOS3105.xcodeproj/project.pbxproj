@@ -29,11 +29,20 @@
     B10000000000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
     B10000000000000000000008 /* RoboIOS3105.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ROBO iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
     B10000000000000000000011 /* DylibEntry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DylibEntry.m; sourceTree = "<group>"; };
+    B10000000000000000000010 /* RoboIOS3105Dylib.dylib */ = {isa = PBXFileReference; explicitFileType = compiled.mach-o.dylib; includeInIndex = 0; path = RoboIOS3105Dylib.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
     B10000000000000000000012 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
     C10000000000000000000001 /* Frameworks */ = {
+      isa = PBXFrameworksBuildPhase;
+      buildActionMask = 2147483647;
+      files = (
+        A1000000000000000000000A /* UIKit.framework in Frameworks */,
+      );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+    C10000000000000000000002 /* Dylib Frameworks */ = {
       isa = PBXFrameworksBuildPhase;
       buildActionMask = 2147483647;
       files = (
@@ -101,7 +110,7 @@
       isa = PBXNativeTarget;
       buildConfigurationList = D30000000000000000000002 /* Build configuration list for PBXNativeTarget "RoboIOS3105Dylib" */;
       buildPhases = (
-        C10000000000000000000001 /* Frameworks */,
+        C10000000000000000000002 /* Dylib Frameworks */,
         D20000000000000000000003 /* Dylib Sources */,
       );
       buildRules = (
