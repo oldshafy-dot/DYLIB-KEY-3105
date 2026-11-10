@@ -14,6 +14,7 @@
     A10000000000000000000005 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* KeychainStore.swift */; };
     A10000000000000000000006 /* StarFieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* StarFieldView.swift */; };
     A10000000000000000000007 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* Info.plist */; };
+    A10000000000000000000008 /* DylibEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* DylibEntry.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
         B10000000000000000000005 /* KeychainStore.swift */,
         B10000000000000000000006 /* StarFieldView.swift */,
         B10000000000000000000007 /* Info.plist */,
+        B10000000000000000000009 /* DylibEntry.swift */,
       );
       path = RoboIOS3105;
       sourceTree = "<group>";
@@ -64,6 +66,7 @@
       isa = PBXGroup;
       children = (
         B10000000000000000000008 /* RoboIOS3105.app */,
+        B10000000000000000000010 /* RoboIOS3105Dylib.dylib */,
       );
       name = Products;
       sourceTree = "<group>";
@@ -88,6 +91,21 @@
       productReference = B10000000000000000000008 /* RoboIOS3105.app */;
       productType = "com.apple.product-type.application";
     };
+    D10000000000000000000002 /* RoboIOS3105Dylib */ = {
+      isa = PBXNativeTarget;
+      buildConfigurationList = D30000000000000000000002 /* Build configuration list for PBXNativeTarget "RoboIOS3105Dylib" */;
+      buildPhases = (
+        D20000000000000000000003 /* Dylib Sources */,
+      );
+      buildRules = (
+      );
+      dependencies = (
+      );
+      name = RoboIOS3105Dylib;
+      productName = RoboIOS3105Dylib;
+      productReference = B10000000000000000000010 /* RoboIOS3105Dylib.dylib */;
+      productType = "com.apple.product-type.library.dynamic";
+    };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -98,6 +116,9 @@
         ORGANIZATIONNAME = "Robo Mods";
         TargetAttributes = {
           D10000000000000000000001 = {
+            CreatedOnToolsVersion = 16.4;
+          };
+          D10000000000000000000002 = {
             CreatedOnToolsVersion = 16.4;
           };
         };
@@ -116,6 +137,7 @@
       projectRoot = "";
       targets = (
         D10000000000000000000001 /* RoboIOS3105 */,
+        D10000000000000000000002 /* RoboIOS3105Dylib */,
       );
     };
 /* End PBXProject section */
@@ -125,6 +147,14 @@
       isa = PBXResourcesBuildPhase;
       buildActionMask = 2147483647;
       files = (
+      );
+      runOnlyForDeploymentPostprocessing = 0;
+    };
+    D20000000000000000000003 /* Dylib Sources */ = {
+      isa = PBXSourcesBuildPhase;
+      buildActionMask = 2147483647;
+      files = (
+        A10000000000000000000008 /* DylibEntry.swift in Sources */,
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
@@ -253,6 +283,36 @@
     };
 /* End XCBuildConfiguration section */
 
+    F30000000000000000000001 /* Dylib Debug */ = {
+      isa = XCBuildConfiguration;
+      buildSettings = {
+        CURRENT_PROJECT_VERSION = 1;
+        DYLIB_COMPATIBILITY_VERSION = 1;
+        DYLIB_CURRENT_VERSION = 1;
+        IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+        MACH_O_TYPE = mh_dylib;
+        PRODUCT_NAME = RoboIOS3105Dylib;
+        SDKROOT = iphoneos;
+        SWIFT_VERSION = 5.0;
+      };
+      name = Debug;
+    };
+    F30000000000000000000002 /* Dylib Release */ = {
+      isa = XCBuildConfiguration;
+      buildSettings = {
+        CURRENT_PROJECT_VERSION = 1;
+        DYLIB_COMPATIBILITY_VERSION = 1;
+        DYLIB_CURRENT_VERSION = 1;
+        IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+        MACH_O_TYPE = mh_dylib;
+        PRODUCT_NAME = RoboIOS3105Dylib;
+        SDKROOT = iphoneos;
+        SWIFT_COMPILATION_MODE = wholemodule;
+        SWIFT_OPTIMIZATION_LEVEL = "-O";
+        SWIFT_VERSION = 5.0;
+      };
+      name = Release;
+    };
 /* Begin XCConfigurationList section */
     E20000000000000000000001 /* Build configuration list for PBXProject "RoboIOS3105" */ = {
       isa = XCConfigurationList;
@@ -268,6 +328,15 @@
       buildConfigurations = (
         F20000000000000000000001 /* Debug */,
         F20000000000000000000002 /* Release */,
+      );
+      defaultConfigurationIsVisible = 0;
+      defaultConfigurationName = Release;
+    };
+    D30000000000000000000002 /* Build configuration list for PBXNativeTarget "RoboIOS3105Dylib" */ = {
+      isa = XCConfigurationList;
+      buildConfigurations = (
+        F30000000000000000000001 /* Dylib Debug */,
+        F30000000000000000000002 /* Dylib Release */,
       );
       defaultConfigurationIsVisible = 0;
       defaultConfigurationName = Release;
