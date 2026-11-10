@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct LicenseView: View {
     @ObservedObject var manager: LicenseManager
