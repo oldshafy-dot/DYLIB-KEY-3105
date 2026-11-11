@@ -82,7 +82,7 @@ static NSString *ROBOInstallationID(void) {
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.view.backgroundColor = UIColor.systemBackground;
+    self.view.backgroundColor = [UIColor systemBackgroundColor];
 
     UILabel *title = [[UILabel alloc] init];
     title.translatesAutoresizingMaskIntoConstraints = NO;
@@ -111,7 +111,7 @@ static NSString *ROBOInstallationID(void) {
     self.keyField.placeholder = @"Enter a license key";
     self.keyField.textColor = ROBOOrange();
     self.keyField.tintColor = ROBOOrange();
-    self.keyField.backgroundColor = UIColor.secondarySystemBackgroundColor;
+    self.keyField.backgroundColor = [UIColor secondarySystemBackgroundColor];
     self.keyField.layer.cornerRadius = 14.0;
     self.keyField.layer.borderWidth = 1.0;
     self.keyField.layer.borderColor = [ROBOOrange() colorWithAlphaComponent:0.35].CGColor;
@@ -216,7 +216,7 @@ static NSString *ROBOInstallationID(void) {
         [self.channelButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-24],
         [self.channelButton.topAnchor constraintEqualToAnchor:self.statusLabel.bottomAnchor constant:18],
         [self.channelButton.heightAnchor constraintEqualToConstant:48]
-    ];
+    ]];
 
     NSString *savedKey = ROBOKeychainRead(kLicenseAccount);
     if (savedKey.length > 0) {
@@ -242,8 +242,8 @@ static NSString *ROBOInstallationID(void) {
 }
 
 - (void)applyAppearance {
-    self.view.backgroundColor = UIColor.systemBackground;
-    self.keyField.backgroundColor = UIColor.secondarySystemBackgroundColor;
+    self.view.backgroundColor = [UIColor systemBackgroundColor];
+    self.keyField.backgroundColor = [UIColor secondarySystemBackgroundColor];
     self.keyField.textColor = ROBOOrange();
     self.keyField.tintColor = ROBOOrange();
     self.keyField.layer.borderColor = [ROBOOrange() colorWithAlphaComponent:0.35].CGColor;
@@ -455,7 +455,7 @@ static UIWindow *roboLicenseWindow = nil;
 
     roboLicenseWindow = [[UIWindow alloc] initWithWindowScene:windowScene];
     roboLicenseWindow.windowLevel = UIWindowLevelAlert + 1.0;
-    roboLicenseWindow.backgroundColor = UIColor.systemBackground;
+    roboLicenseWindow.backgroundColor = [UIColor systemBackgroundColor];
     roboLicenseWindow.rootViewController = [RoboIOS3105LicenseViewController new];
     roboLicenseWindow.hidden = NO;
     [roboLicenseWindow makeKeyAndVisible];
