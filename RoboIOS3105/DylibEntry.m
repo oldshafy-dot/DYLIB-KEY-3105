@@ -27,7 +27,7 @@
     subtitle.translatesAutoresizingMaskIntoConstraints = NO;
     subtitle.text = @"3105";
     subtitle.textAlignment = NSTextAlignmentCenter;
-    subtitle.textColor = [UIColor whiteColor colorWithAlphaComponent:0.65];
+    subtitle.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.65];
     subtitle.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
 
     UILabel *notice = [[UILabel alloc] init];
@@ -35,7 +35,7 @@
     notice.text = @"This 3105 is cracked by Shafay, owner of Robo Mods";
     notice.textAlignment = NSTextAlignmentCenter;
     notice.numberOfLines = 0;
-    notice.textColor = [UIColor whiteColor colorWithAlphaComponent:0.72];
+    notice.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.72];
     notice.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
 
     self.keyField = [[UITextField alloc] init];
@@ -43,10 +43,10 @@
     self.keyField.placeholder = @"Enter a license key";
     self.keyField.textColor = UIColor.whiteColor;
     self.keyField.tintColor = UIColor.redColor;
-    self.keyField.backgroundColor = [UIColor whiteColor colorWithAlphaComponent:0.07];
+    self.keyField.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.07];
     self.keyField.layer.cornerRadius = 14;
     self.keyField.layer.borderWidth = 1;
-    self.keyField.layer.borderColor = [UIColor whiteColor colorWithAlphaComponent:0.12].CGColor;
+    self.keyField.layer.borderColor = [[UIColor whiteColor] colorWithAlphaComponent:0.12].CGColor;
     self.keyField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0,0,16,1)];
     self.keyField.leftViewMode = UITextFieldViewModeAlways;
     self.keyField.rightView = [[UIView alloc] initWithFrame:CGRectMake(0,0,16,1)];
@@ -73,13 +73,13 @@
     self.messageLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.messageLabel.textAlignment = NSTextAlignmentCenter;
     self.messageLabel.numberOfLines = 0;
-    self.messageLabel.textColor = [UIColor redColor colorWithAlphaComponent:0.95];
+    self.messageLabel.textColor = [[UIColor redColor] colorWithAlphaComponent:0.95];
     self.messageLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
 
     UIButton *telegram = [UIButton buttonWithType:UIButtonTypeSystem];
     telegram.translatesAutoresizingMaskIntoConstraints = NO;
     [telegram setTitle:@"Join Robo Official" forState:UIControlStateNormal];
-    [telegram setTitleColor:[UIColor whiteColor colorWithAlphaComponent:0.7] forState:UIControlStateNormal];
+    [telegram setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.7] forState:UIControlStateNormal];
     telegram.titleLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightSemibold];
     [telegram addTarget:self action:@selector(openTelegram) forControlEvents:UIControlEventTouchUpInside];
 
@@ -177,12 +177,12 @@
                 [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"RoboIOS3105LicenseVerified"];
                 [[NSUserDefaults standardUserDefaults] synchronize];
 
-                self.messageLabel.textColor = [UIColor greenColor colorWithAlphaComponent:0.9];
+                self.messageLabel.textColor = [[UIColor greenColor] colorWithAlphaComponent:0.9];
                 self.messageLabel.text = @"License verified.";
                 self.verifyButton.hidden = YES;
                 self.keyField.hidden = YES;
             } else {
-                self.messageLabel.textColor = [UIColor redColor colorWithAlphaComponent:0.95];
+                self.messageLabel.textColor = [[UIColor redColor] colorWithAlphaComponent:0.95];
                 self.messageLabel.text = message.length ? message : @"License is invalid or not authorized for this device.";
             }
         });
