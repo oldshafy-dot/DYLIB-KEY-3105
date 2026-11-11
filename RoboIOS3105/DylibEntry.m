@@ -466,63 +466,94 @@ static void ROBOAddFallingStars(UIView *view) {
 
 
 static UIWindow *roboLicenseWindow = nil;
-static UIView *roboMadeByBanner = nil;
+static UIWindow *roboBrandWindow = nil;
 
-static void ROBOInstallMadeByBanner(void) {
+static void ROBOInstallBrandOverlay(UIWindowScene *windowScene) {
+    if (!windowScene) return;
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        ROBOInstallMadeByBanner();
-
-        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
-            if (![scene isKindOfClass:[UIWindowScene class]]) continue;
-            UIWindowScene *windowScene = (UIWindowScene *)scene;
-            if (windowScene.activationState != UISceneActivationStateForegroundActive &&
-                windowScene.activationState != UISceneActivationStateForegroundInactive) {
-                continue;
-            }
-
-            UIWindow *hostWindow = nil;
-            for (UIWindow *window in windowScene.windows) {
-                if (window == roboLicenseWindow) continue;
-                if (!window.hidden && window.windowLevel == UIWindowLevelNormal) {
-                    hostWindow = window;
-                    break;
-                }
-            }
-            if (!hostWindow) continue;
-
-            if (roboMadeByBanner.superview == hostWindow) return;
-
-            [roboMadeByBanner removeFromSuperview];
-            roboMadeByBanner = [[UIView alloc] init];
-            roboMadeByBanner.translatesAutoresizingMaskIntoConstraints = NO;
-            roboMadeByBanner.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.08];
-            roboMadeByBanner.layer.cornerRadius = 14.0;
-            roboMadeByBanner.layer.borderWidth = 1.0;
-            roboMadeByBanner.layer.borderColor = [UIColor colorWithWhite:0.55 alpha:0.35].CGColor;
-
-            UILabel *label = [[UILabel alloc] init];
-            label.translatesAutoresizingMaskIntoConstraints = NO;
-            label.text = @"Made by Shafay";
-            label.textColor = ROBOOrange();
-            label.font = [UIFont systemFontOfSize:15.0 weight:UIFontWeightBold];
-
-            [roboMadeByBanner addSubview:label];
-            [hostWindow addSubview:roboMadeByBanner];
-
-            UILayoutGuide *safe = hostWindow.safeAreaLayoutGuide;
-            [NSLayoutConstraint activateConstraints:@[
-                [roboMadeByBanner.leadingAnchor constraintEqualToAnchor:hostWindow.leadingAnchor constant:16],
-                [roboMadeByBanner.trailingAnchor constraintEqualToAnchor:hostWindow.trailingAnchor constant:-16],
-                [roboMadeByBanner.topAnchor constraintEqualToAnchor:safe.topAnchor constant:8],
-                [roboMadeByBanner.heightAnchor constraintEqualToConstant:46],
-
-                [label.leadingAnchor constraintEqualToAnchor:roboMadeByBanner.leadingAnchor constant:16],
-                [label.centerYAnchor constraintEqualToAnchor:roboMadeByBanner.centerYAnchor]
-            ]];
-
-            [hostWindow bringSubviewToFront:roboMadeByBanner];
+        if (roboBrandWindow && roboBrandWindow.windowScene == windowScene) {
+            roboBrandWindow.hidden = NO;
+            [roboBrandWindow bringSubviewToFront:roboBrandWindow.rootViewController.view];
             return;
         }
+
+        UIViewController *overlay = [UIViewController new];
+        overlay.view.backgroundColor = UIColor.clearColor;
+        overlay.view.userInteractionEnabled = NO;
+
+        UIView *safeContainer = [UIView new];
+        safeContainer.translatesAutoresizingMaskIntoConstraints = NO;
+        safeContainer.backgroundColor = UIColor.clearColor;
+        safeContainer.userInteractionEnabled = NO;
+        [overlay.view addSubview:safeContainer];
+
+        UIView *banner = [UIView new];
+        banner.translatesAutoresizingMaskIntoConstraints = NO;
+        banner.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.08];
+        banner.layer.cornerRadius = 14.0;
+        banner.layer.borderWidth = 1.0;
+        banner.layer.borderColor = [UIColor colorWithWhite:0.55 alpha:0.35].CGColor;
+        banner.userInteractionEnabled = NO;
+
+        UILabel *label = [UILabel new];
+        label.translatesAutoresizingMaskIntoConstraints = NO;
+        label.text = @"Made by Shafay";
+        label.textColor = ROBOOrange();
+        label.font = [UIFont systemFontOfSize:15.0 weight:UIFontWeightBold];
+
+        [banner addSubview:label];
+        [safeContainer addSubview:banner];
+
+        CAEmitterLayer *emitter = [CAEmitterLayer layer];
+        emitter.name = @"ROBOBrandFallingStars";
+        emitter.masksToBounds = YES;
+        emitter.emitterShape = kCAEmitterLayerLine;
+        emitter.emitterMode = kCAEmitterLayerSurface;
+
+        CAEmitterCell *cell = [CAEmitterCell emitterCell];
+        cell.birthRate = 10.0;
+        cell.lifetime = 7.0;
+        cell.velocity = 34.0;
+        cell.velocityRange = 18.0;
+        cell.emissionLongitude = (CGFloat)M_PI_2;
+        cell.emissionRange = 0.12;
+        cell.scale = 0.035;
+        cell.scaleRange = 0.018;
+        cell.alphaSpeed = -0.08;
+        cell.contents = (__bridge id)[UIImage systemImageNamed:@"circle.fill"].CGImage;
+        cell.color = (overlay.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+            ? UIColor.whiteColor.CGColor
+            : UIColor.blackColor.CGColor;
+        emitter.emitterCells = @[cell];
+        [safeContainer.layer addSublayer:emitter];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [safeContainer.leadingAnchor constraintEqualToAnchor:overlay.view.leadingAnchor],
+            [safeContainer.trailingAnchor constraintEqualToAnchor:overlay.view.trailingAnchor],
+            [safeContainer.topAnchor constraintEqualToAnchor:overlay.view.safeAreaLayoutGuide.topAnchor],
+            [safeContainer.bottomAnchor constraintEqualToAnchor:overlay.view.safeAreaLayoutGuide.bottomAnchor],
+
+            [banner.leadingAnchor constraintEqualToAnchor:safeContainer.leadingAnchor constant:16],
+            [banner.trailingAnchor constraintEqualToAnchor:safeContainer.trailingAnchor constant:-16],
+            [banner.topAnchor constraintEqualToAnchor:safeContainer.topAnchor constant:8],
+            [banner.heightAnchor constraintEqualToConstant:46],
+
+            [label.leadingAnchor constraintEqualToAnchor:banner.leadingAnchor constant:16],
+            [label.centerYAnchor constraintEqualToAnchor:banner.centerYAnchor]
+        ]];
+
+        [overlay.view layoutIfNeeded];
+        emitter.frame = safeContainer.bounds;
+        emitter.emitterSize = CGSizeMake(safeContainer.bounds.size.width, 1.0);
+        emitter.emitterPosition = CGPointMake(safeContainer.bounds.size.width / 2.0, -2.0);
+
+        roboBrandWindow = [[UIWindow alloc] initWithWindowScene:windowScene];
+        roboBrandWindow.windowLevel = UIWindowLevelNormal + 0.5;
+        roboBrandWindow.backgroundColor = UIColor.clearColor;
+        roboBrandWindow.rootViewController = overlay;
+        roboBrandWindow.hidden = NO;
+        [roboBrandWindow setUserInteractionEnabled:NO];
     });
 }
 
@@ -551,7 +582,10 @@ static void ROBOInstallMadeByBanner(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self showLicenseIfNeeded];
         if (roboLicenseWindow == nil) {
-            ROBOInstallMadeByBanner();
+            UIWindowScene *windowScene = (UIWindowScene *)notification.object;
+            if ([windowScene isKindOfClass:[UIWindowScene class]]) {
+                ROBOInstallBrandOverlay(windowScene);
+            }
         }
     });
 }
@@ -601,6 +635,21 @@ static void ROBOInstallMadeByBanner(void) {
                     return;
                 }
             }
+        }
+
+        UIWindowScene *activeScene = nil;
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *candidate = (UIWindowScene *)scene;
+                if (candidate.activationState == UISceneActivationStateForegroundActive ||
+                    candidate.activationState == UISceneActivationStateForegroundInactive) {
+                    activeScene = candidate;
+                    break;
+                }
+            }
+        }
+        if (activeScene) {
+            ROBOInstallBrandOverlay(activeScene);
         }
     });
 }
