@@ -13,7 +13,6 @@ private struct MainPlaceholderView: View {
                 .ignoresSafeArea()
 
             StarFieldView()
-                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 RoboMadeByBanner()
