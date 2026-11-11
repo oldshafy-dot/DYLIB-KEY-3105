@@ -2,15 +2,22 @@ import Foundation
 import Darwin
 
 enum DylibLoader {
-    static func load() {
-        let path = Bundle.main.privateFrameworksPath.map {
-            URL(fileURLWithPath: $0).appendingPathComponent("iOS 27 WORKING.dylib").path
+    static let dylibName = "iOS 27 WORKING.dylib"
+
+    @discardableResult
+    static func load() -> Bool {
+        guard let frameworksPath = Bundle.main.privateFrameworksPath else {
+            return false
         }
 
-        guard let path else {
-            return
+        let path = URL(fileURLWithPath: frameworksPath)
+            .appendingPathComponent(dylibName)
+            .path
+
+        guard FileManager.default.fileExists(atPath: path) else {
+            return false
         }
 
-        _ = dlopen(path, RTLD_NOW | RTLD_LOCAL)
+        return dlopen(path, RTLD_NOW | RTLD_LOCAL) != nil
     }
 }
