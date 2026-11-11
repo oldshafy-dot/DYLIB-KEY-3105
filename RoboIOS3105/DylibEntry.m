@@ -264,7 +264,9 @@ static void ROBOAddFallingStars(UIView *view) {
     NSString *savedKey = ROBOKeychainRead(kLicenseAccount);
     if (savedKey.length > 0) {
         self.keyField.text = savedKey;
-        self.statusLabel.text = @"Checking saved license...";
+        self.keyField.enabled = NO;
+        self.keyField.alpha = 0.72;
+        self.statusLabel.text = @"Loading saved license...";
         dispatch_async(dispatch_get_main_queue(), ^{
             [self verifyKey:savedKey automatic:YES];
         });
@@ -276,7 +278,12 @@ static void ROBOAddFallingStars(UIView *view) {
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self applyAppearance];
-    [self.keyField becomeFirstResponder];
+
+    // On a returning launch, the saved-key verification should stay in a
+    // loading state instead of popping the keyboard over the license screen.
+    if (!self.verifying && self.keyField.text.length == 0) {
+        [self.keyField becomeFirstResponder];
+    }
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
@@ -311,10 +318,16 @@ static void ROBOAddFallingStars(UIView *view) {
     self.verifying = YES;
     self.verifyButton.enabled = NO;
     self.channelButton.enabled = NO;
+    self.keyField.enabled = NO;
     self.spinner.hidden = NO;
     [self.spinner startAnimating];
+
+    // Keep the loading indicator directly on top of the activation button.
+    [self.verifyButton setTitle:automatic ? @"LOADING..." : @"LOADING..." forState:UIControlStateNormal];
+    self.verifyButton.alpha = 0.92;
+
     self.messageLabel.text = @"";
-    self.statusLabel.text = automatic ? @"Verifying saved license..." : @"Verifying license...";
+    self.statusLabel.text = automatic ? @"Loading saved license..." : @"Authorizing license...";
 
     NSString *deviceID = ROBOInstallationID();
     NSURL *url = [NSURL URLWithString:kVerifyURL];
@@ -413,8 +426,12 @@ static void ROBOAddFallingStars(UIView *view) {
     self.verifying = NO;
     self.verifyButton.enabled = YES;
     self.channelButton.enabled = YES;
+    self.keyField.enabled = YES;
+    self.keyField.alpha = 1.0;
     [self.spinner stopAnimating];
     self.spinner.hidden = YES;
+    [self.verifyButton setTitle:@"ACTIVATE" forState:UIControlStateNormal];
+    self.verifyButton.alpha = 1.0;
     self.messageLabel.textColor = ROBOOrange();
     self.messageLabel.text = message ?: @"";
 
