@@ -1,10 +1,80 @@
 #import <UIKit/UIKit.h>
+#import <Security/Security.h>
+
+static NSString * const kLicenseService = @"ROBO-iOS-3105";
+static NSString * const kLicenseAccount = @"com.robomods.roboios3105.license";
+static NSString * const kInstallationAccount = @"com.robomods.roboios3105.installation-id";
+static NSString * const kProductIdentifier = @"3105";
+static NSString * const kVerifyURL = @"https://shafaykeyauthadmin.lovable.app/api/public/v1/verify-license";
+
+static UIColor *ROBOOrange(void) {
+    return [UIColor colorWithRed:1.0 green:0.36 blue:0.0 alpha:1.0]; // Sunset Orange
+}
+
+static NSString *ROBOKeychainRead(NSString *account) {
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecAttrService: kLicenseService,
+        (__bridge id)kSecAttrAccount: account,
+        (__bridge id)kSecReturnData: @YES,
+        (__bridge id)kSecMatchLimit: (__bridge id)kSecMatchLimitOne
+    };
+
+    CFTypeRef result = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+    if (status != errSecSuccess || !result) {
+        return nil;
+    }
+
+    NSData *data = CFBridgingRelease(result);
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+
+static BOOL ROBOKeychainWrite(NSString *value, NSString *account) {
+    NSData *data = [value dataUsingEncoding:NSUTF8StringEncoding];
+    if (!data) return NO;
+
+    NSDictionary *query = @{
+        (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecAttrService: kLicenseService,
+        (__bridge id)kSecAttrAccount: account
+    };
+
+    NSDictionary *attributes = @{
+        (__bridge id)kSecValueData: data,
+        (__bridge id)kSecAttrAccessible: (__bridge id)kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    };
+
+    OSStatus update = SecItemUpdate((__bridge CFDictionaryRef)query, (__bridge CFDictionaryRef)attributes);
+    if (update == errSecSuccess) return YES;
+    if (update != errSecItemNotFound) return NO;
+
+    NSMutableDictionary *add = [query mutableCopy];
+    [add addEntriesFromDictionary:attributes];
+    return SecItemAdd((__bridge CFDictionaryRef)add, NULL) == errSecSuccess;
+}
+
+static NSString *ROBOInstallationID(void) {
+    NSString *existing = ROBOKeychainRead(kInstallationAccount);
+    if (existing.length > 0) return existing;
+
+    NSString *newID = [NSUUID UUID].UUIDString;
+    if (ROBOKeychainWrite(newID, kInstallationAccount)) {
+        return newID;
+    }
+
+    // Last-resort stable identifier for the current installation session.
+    return [[[UIDevice currentDevice] identifierForVendor] UUIDString] ?: @"";
+}
 
 @interface RoboIOS3105LicenseViewController : UIViewController <UITextFieldDelegate>
 @property(nonatomic,strong) UITextField *keyField;
 @property(nonatomic,strong) UIButton *verifyButton;
+@property(nonatomic,strong) UIButton *channelButton;
 @property(nonatomic,strong) UIActivityIndicatorView *spinner;
 @property(nonatomic,strong) UILabel *messageLabel;
+@property(nonatomic,strong) UILabel *statusLabel;
+@property(nonatomic,assign) BOOL verifying;
 @end
 
 @implementation RoboIOS3105LicenseViewController
@@ -12,56 +82,63 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.view.backgroundColor = UIColor.blackColor;
+    self.view.backgroundColor = UIColor.systemBackground;
 
     UILabel *title = [[UILabel alloc] init];
     title.translatesAutoresizingMaskIntoConstraints = NO;
+    title.text = @"ROBO iOS";
     title.textAlignment = NSTextAlignmentCenter;
-    title.attributedText = [[NSAttributedString alloc] initWithString:@"ROBO iOS"
-        attributes:@{
-            NSFontAttributeName: [UIFont systemFontOfSize:42 weight:UIFontWeightBlack],
-            NSForegroundColorAttributeName: UIColor.whiteColor
-        }];
+    title.textColor = ROBOOrange();
+    title.font = [UIFont systemFontOfSize:42 weight:UIFontWeightBlack];
 
-    UILabel *subtitle = [[UILabel alloc] init];
-    subtitle.translatesAutoresizingMaskIntoConstraints = NO;
-    subtitle.text = @"3105";
-    subtitle.textAlignment = NSTextAlignmentCenter;
-    subtitle.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.65];
-    subtitle.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
+    UILabel *version = [[UILabel alloc] init];
+    version.translatesAutoresizingMaskIntoConstraints = NO;
+    version.text = @"3105";
+    version.textAlignment = NSTextAlignmentCenter;
+    version.textColor = ROBOOrange();
+    version.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
 
     UILabel *notice = [[UILabel alloc] init];
     notice.translatesAutoresizingMaskIntoConstraints = NO;
     notice.text = @"This 3105 is cracked by Shafay, owner of Robo Mods";
     notice.textAlignment = NSTextAlignmentCenter;
     notice.numberOfLines = 0;
-    notice.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.72];
+    notice.textColor = ROBOOrange();
     notice.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
 
     self.keyField = [[UITextField alloc] init];
     self.keyField.translatesAutoresizingMaskIntoConstraints = NO;
     self.keyField.placeholder = @"Enter a license key";
-    self.keyField.textColor = UIColor.whiteColor;
-    self.keyField.tintColor = UIColor.redColor;
-    self.keyField.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.07];
-    self.keyField.layer.cornerRadius = 14;
-    self.keyField.layer.borderWidth = 1;
-    self.keyField.layer.borderColor = [[UIColor whiteColor] colorWithAlphaComponent:0.12].CGColor;
+    self.keyField.textColor = ROBOOrange();
+    self.keyField.tintColor = ROBOOrange();
+    self.keyField.backgroundColor = UIColor.secondarySystemBackgroundColor;
+    self.keyField.layer.cornerRadius = 14.0;
+    self.keyField.layer.borderWidth = 1.0;
+    self.keyField.layer.borderColor = [ROBOOrange() colorWithAlphaComponent:0.35].CGColor;
     self.keyField.leftView = [[UIView alloc] initWithFrame:CGRectMake(0,0,16,1)];
     self.keyField.leftViewMode = UITextFieldViewModeAlways;
     self.keyField.rightView = [[UIView alloc] initWithFrame:CGRectMake(0,0,16,1)];
     self.keyField.rightViewMode = UITextFieldViewModeAlways;
     self.keyField.autocapitalizationType = UITextAutocapitalizationTypeAllCharacters;
     self.keyField.autocorrectionType = UITextAutocorrectionTypeNo;
+    self.keyField.spellCheckingType = UITextSpellCheckingTypeNo;
     self.keyField.delegate = self;
+    self.keyField.returnKeyType = UIReturnKeyDone;
+
+    NSDictionary *placeholderAttributes = @{
+        NSForegroundColorAttributeName: [ROBOOrange() colorWithAlphaComponent:0.55]
+    };
+    self.keyField.attributedPlaceholder =
+        [[NSAttributedString alloc] initWithString:@"Enter a license key"
+                                         attributes:placeholderAttributes];
 
     self.verifyButton = [UIButton buttonWithType:UIButtonTypeSystem];
     self.verifyButton.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.verifyButton setTitle:@"VERIFY" forState:UIControlStateNormal];
+    [self.verifyButton setTitle:@"ACTIVATE" forState:UIControlStateNormal];
     [self.verifyButton setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
-    self.verifyButton.titleLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightBold];
-    self.verifyButton.backgroundColor = UIColor.redColor;
-    self.verifyButton.layer.cornerRadius = 14;
+    self.verifyButton.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightBold];
+    self.verifyButton.backgroundColor = ROBOOrange();
+    self.verifyButton.layer.cornerRadius = 14.0;
     [self.verifyButton addTarget:self action:@selector(verifyPressed) forControlEvents:UIControlEventTouchUpInside];
 
     self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
@@ -73,126 +150,256 @@
     self.messageLabel.translatesAutoresizingMaskIntoConstraints = NO;
     self.messageLabel.textAlignment = NSTextAlignmentCenter;
     self.messageLabel.numberOfLines = 0;
-    self.messageLabel.textColor = [[UIColor redColor] colorWithAlphaComponent:0.95];
+    self.messageLabel.textColor = ROBOOrange();
     self.messageLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
 
-    UIButton *telegram = [UIButton buttonWithType:UIButtonTypeSystem];
-    telegram.translatesAutoresizingMaskIntoConstraints = NO;
-    [telegram setTitle:@"Join Robo Official" forState:UIControlStateNormal];
-    [telegram setTitleColor:[[UIColor whiteColor] colorWithAlphaComponent:0.7] forState:UIControlStateNormal];
-    telegram.titleLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightSemibold];
-    [telegram addTarget:self action:@selector(openTelegram) forControlEvents:UIControlEventTouchUpInside];
+    self.statusLabel = [[UILabel alloc] init];
+    self.statusLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    self.statusLabel.textAlignment = NSTextAlignmentCenter;
+    self.statusLabel.textColor = ROBOOrange();
+    self.statusLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightMedium];
+
+    self.channelButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    self.channelButton.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.channelButton setTitle:@"Official Channel" forState:UIControlStateNormal];
+    [self.channelButton setTitleColor:ROBOOrange() forState:UIControlStateNormal];
+    self.channelButton.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
+    self.channelButton.layer.cornerRadius = 12.0;
+    self.channelButton.backgroundColor = [ROBOOrange() colorWithAlphaComponent:0.10];
+    [self.channelButton addTarget:self action:@selector(openTelegram) forControlEvents:UIControlEventTouchUpInside];
 
     [self.view addSubview:title];
-    [self.view addSubview:subtitle];
+    [self.view addSubview:version];
     [self.view addSubview:notice];
     [self.view addSubview:self.keyField];
     [self.view addSubview:self.verifyButton];
     [self.view addSubview:self.spinner];
     [self.view addSubview:self.messageLabel];
-    [self.view addSubview:telegram];
+    [self.view addSubview:self.statusLabel];
+    [self.view addSubview:self.channelButton];
 
     UILayoutGuide *safe = self.view.safeAreaLayoutGuide;
+
     [NSLayoutConstraint activateConstraints:@[
         [title.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-        [title.topAnchor constraintEqualToAnchor:safe.topAnchor constant:70],
+        [title.topAnchor constraintEqualToAnchor:safe.topAnchor constant:58],
 
-        [subtitle.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-        [subtitle.topAnchor constraintEqualToAnchor:title.bottomAnchor constant:4],
+        [version.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [version.topAnchor constraintEqualToAnchor:title.bottomAnchor constant:4],
 
         [notice.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:28],
         [notice.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-28],
-        [notice.topAnchor constraintEqualToAnchor:subtitle.bottomAnchor constant:18],
+        [notice.topAnchor constraintEqualToAnchor:version.bottomAnchor constant:18],
 
         [self.keyField.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:24],
         [self.keyField.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-24],
         [self.keyField.topAnchor constraintEqualToAnchor:notice.bottomAnchor constant:28],
-        [self.keyField.heightAnchor constraintEqualToConstant:52],
+        [self.keyField.heightAnchor constraintEqualToConstant:54],
 
         [self.verifyButton.leadingAnchor constraintEqualToAnchor:self.keyField.leadingAnchor],
         [self.verifyButton.trailingAnchor constraintEqualToAnchor:self.keyField.trailingAnchor],
         [self.verifyButton.topAnchor constraintEqualToAnchor:self.keyField.bottomAnchor constant:12],
-        [self.verifyButton.heightAnchor constraintEqualToConstant:52],
+        [self.verifyButton.heightAnchor constraintEqualToConstant:54],
 
         [self.spinner.centerXAnchor constraintEqualToAnchor:self.verifyButton.centerXAnchor],
         [self.spinner.centerYAnchor constraintEqualToAnchor:self.verifyButton.centerYAnchor],
 
         [self.messageLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:30],
         [self.messageLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-30],
-        [self.messageLabel.topAnchor constraintEqualToAnchor:self.verifyButton.bottomAnchor constant:14],
+        [self.messageLabel.topAnchor constraintEqualToAnchor:self.verifyButton.bottomAnchor constant:13],
 
-        [telegram.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
-        [telegram.bottomAnchor constraintEqualToAnchor:safe.bottomAnchor constant:-20]
-    ]];
+        [self.statusLabel.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:30],
+        [self.statusLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-30],
+        [self.statusLabel.topAnchor constraintEqualToAnchor:self.messageLabel.bottomAnchor constant:5],
+
+        [self.channelButton.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:24],
+        [self.channelButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-24],
+        [self.channelButton.topAnchor constraintEqualToAnchor:self.statusLabel.bottomAnchor constant:18],
+        [self.channelButton.heightAnchor constraintEqualToConstant:48]
+    ];
+
+    NSString *savedKey = ROBOKeychainRead(kLicenseAccount);
+    if (savedKey.length > 0) {
+        self.keyField.text = savedKey;
+        self.statusLabel.text = @"Checking saved license...";
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self verifyKey:savedKey automatic:YES];
+        });
+    } else {
+        self.statusLabel.text = @"License verification required";
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self applyAppearance];
+    [self.keyField becomeFirstResponder];
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    [super traitCollectionDidChange:previousTraitCollection];
+    [self applyAppearance];
+}
+
+- (void)applyAppearance {
+    self.view.backgroundColor = UIColor.systemBackground;
+    self.keyField.backgroundColor = UIColor.secondarySystemBackgroundColor;
+    self.keyField.textColor = ROBOOrange();
+    self.keyField.tintColor = ROBOOrange();
+    self.keyField.layer.borderColor = [ROBOOrange() colorWithAlphaComponent:0.35].CGColor;
+    self.channelButton.backgroundColor = [ROBOOrange() colorWithAlphaComponent:0.10];
 }
 
 - (void)verifyPressed {
     NSString *key = [self.keyField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (key.length == 0) {
+        self.messageLabel.textColor = ROBOOrange();
         self.messageLabel.text = @"Please enter a license key.";
         return;
     }
 
+    [self.keyField resignFirstResponder];
+    [self verifyKey:key automatic:NO];
+}
+
+- (void)verifyKey:(NSString *)key automatic:(BOOL)automatic {
+    if (self.verifying) return;
+
+    self.verifying = YES;
     self.verifyButton.enabled = NO;
+    self.channelButton.enabled = NO;
     self.spinner.hidden = NO;
     [self.spinner startAnimating];
     self.messageLabel.text = @"";
+    self.statusLabel.text = automatic ? @"Verifying saved license..." : @"Verifying license...";
 
-    NSString *deviceID = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-    NSURL *url = [NSURL URLWithString:@"https://shafaykeyauthadmin.lovable.app/api/public/v1/verify-license"];
+    NSString *deviceID = ROBOInstallationID();
+    NSURL *url = [NSURL URLWithString:kVerifyURL];
+
+    if (!url) {
+        [self finishVerification:NO key:key message:@"Invalid verification endpoint."];
+        return;
+    }
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
+    request.timeoutInterval = 15.0;
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
 
     NSDictionary *body = @{
         @"key": key,
         @"device_id": deviceID ?: @"",
-        @"product_identifier": @"3105"
+        @"product_identifier": kProductIdentifier
     };
-    request.HTTPBody = [NSJSONSerialization dataWithJSONObject:body options:0 error:nil];
+
+    NSError *serializationError = nil;
+    request.HTTPBody = [NSJSONSerialization dataWithJSONObject:body options:0 error:&serializationError];
+    if (serializationError || !request.HTTPBody) {
+        [self finishVerification:NO key:key message:@"Could not prepare the verification request."];
+        return;
+    }
 
     NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.verifyButton.enabled = YES;
-            [self.spinner stopAnimating];
-            self.spinner.hidden = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (error) {
+                    [self finishVerification:NO key:key message:@"Unable to connect to the license server. Check your connection and try again."];
+                    return;
+                }
 
-            if (error) {
-                self.messageLabel.text = @"Unable to connect to the license server.";
-                return;
-            }
+                NSHTTPURLResponse *http = [response isKindOfClass:[NSHTTPURLResponse class]]
+                    ? (NSHTTPURLResponse *)response
+                    : nil;
 
-            NSDictionary *json = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
-            BOOL success = [json[@"success"] boolValue] || [json[@"valid"] boolValue];
+                NSDictionary *json = nil;
+                if (data.length > 0) {
+                    id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                    if ([object isKindOfClass:[NSDictionary class]]) {
+                        json = (NSDictionary *)object;
+                    }
+                }
 
-            NSDictionary *nested = [json[@"data"] isKindOfClass:[NSDictionary class]] ? json[@"data"] : nil;
-            success = success || [nested[@"success"] boolValue] || [nested[@"valid"] boolValue];
+                BOOL success = [json[@"success"] boolValue] || [json[@"valid"] boolValue];
+                NSDictionary *nested = [json[@"data"] isKindOfClass:[NSDictionary class]] ? json[@"data"] : nil;
+                success = success || [nested[@"success"] boolValue] || [nested[@"valid"] boolValue];
 
-            NSString *message = json[@"message"] ?: json[@"error"] ?: json[@"detail"];
+                NSString *status = [json[@"status"] isKindOfClass:[NSString class]] ? [json[@"status"] lowercaseString] : @"";
+                success = success || [status isEqualToString:@"success"] || [status isEqualToString:@"valid"];
 
-            if (success) {
-                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"RoboIOS3105LicenseVerified"];
-                [[NSUserDefaults standardUserDefaults] synchronize];
+                NSString *message = nil;
+                NSArray *messageKeys = @[@"message", @"error", @"detail"];
+                for (NSString *keyName in messageKeys) {
+                    if ([json[keyName] isKindOfClass:[NSString class]] && [json[keyName] length] > 0) {
+                        message = json[keyName];
+                        break;
+                    }
+                }
 
-                self.messageLabel.textColor = [[UIColor greenColor] colorWithAlphaComponent:0.9];
-                self.messageLabel.text = @"License verified.";
-                self.verifyButton.hidden = YES;
-                self.keyField.hidden = YES;
-            } else {
-                self.messageLabel.textColor = [[UIColor redColor] colorWithAlphaComponent:0.95];
-                self.messageLabel.text = message.length ? message : @"License is invalid or not authorized for this device.";
-            }
-        });
-    }];
+                if (!success && nested) {
+                    for (NSString *keyName in messageKeys) {
+                        if ([nested[keyName] isKindOfClass:[NSString class]] && [nested[keyName] length] > 0) {
+                            message = nested[keyName];
+                            break;
+                        }
+                    }
+                }
+
+                if (!http || http.statusCode < 200 || http.statusCode > 299) {
+                    success = NO;
+                }
+
+                if (success) {
+                    BOOL saved = ROBOKeychainWrite(key, kLicenseAccount);
+                    if (!saved) {
+                        [self finishVerification:NO key:key message:@"License verified, but secure storage failed. Please try again."];
+                        return;
+                    }
+
+                    [self finishVerification:YES key:key message:@"License verified. Opening app..."];
+                } else {
+                    [self finishVerification:NO key:key message:(message.length ? message : @"License is invalid or not authorized for this device.")];
+                }
+            });
+        }];
+
     [task resume];
+}
+
+- (void)finishVerification:(BOOL)success key:(NSString *)key message:(NSString *)message {
+    self.verifying = NO;
+    self.verifyButton.enabled = YES;
+    self.channelButton.enabled = YES;
+    [self.spinner stopAnimating];
+    self.spinner.hidden = YES;
+    self.messageLabel.textColor = ROBOOrange();
+    self.messageLabel.text = message ?: @"";
+
+    if (!success) {
+        self.statusLabel.text = @"Verification required";
+        return;
+    }
+
+    self.statusLabel.text = @"Activated";
+    self.verifyButton.hidden = YES;
+    self.keyField.hidden = YES;
+    self.channelButton.hidden = YES;
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"RoboIOS3105LicenseDidVerify" object:nil];
+    });
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [self verifyPressed];
+    return YES;
 }
 
 - (void)openTelegram {
     NSURL *url = [NSURL URLWithString:@"https://t.me/roboios"];
-    [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    if (url) {
+        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    }
 }
 
 @end
@@ -202,59 +409,76 @@
 
 @implementation RoboIOS3105Loader
 
+static UIWindow *roboLicenseWindow = nil;
+
 + (void)load {
-    [self waitForHostWindow:0];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(sceneDidActivate:)
+                                                     name:UISceneDidActivateNotification
+                                                   object:nil];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(licenseDidVerify:)
+                                                     name:@"RoboIOS3105LicenseDidVerify"
+                                                   object:nil];
+
+        [self showLicenseIfNeeded];
+    });
 }
 
-+ (void)waitForHostWindow:(NSInteger)attempt {
-    if (attempt > 100) return;
-
++ (void)sceneDidActivate:(NSNotification *)notification {
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIWindow *window = nil;
+        [self showLicenseIfNeeded];
+    });
+}
+
++ (void)showLicenseIfNeeded {
+    if (roboLicenseWindow != nil && !roboLicenseWindow.hidden) {
+        return;
+    }
+
+    UIWindowScene *windowScene = nil;
+
+    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+        if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+        UISceneActivationState state = scene.activationState;
+        if (state == UISceneActivationStateForegroundActive || state == UISceneActivationStateForegroundInactive) {
+            windowScene = (UIWindowScene *)scene;
+            break;
+        }
+    }
+
+    if (!windowScene) {
+        return;
+    }
+
+    roboLicenseWindow = [[UIWindow alloc] initWithWindowScene:windowScene];
+    roboLicenseWindow.windowLevel = UIWindowLevelAlert + 1.0;
+    roboLicenseWindow.backgroundColor = UIColor.systemBackground;
+    roboLicenseWindow.rootViewController = [RoboIOS3105LicenseViewController new];
+    roboLicenseWindow.hidden = NO;
+    [roboLicenseWindow makeKeyAndVisible];
+}
+
++ (void)licenseDidVerify:(NSNotification *)notification {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [roboLicenseWindow resignKeyWindow];
+        roboLicenseWindow.hidden = YES;
+        roboLicenseWindow.rootViewController = nil;
+        roboLicenseWindow = nil;
 
         for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
             if (![scene isKindOfClass:[UIWindowScene class]]) continue;
 
             UIWindowScene *sceneWindow = (UIWindowScene *)scene;
-            for (UIWindow *candidate in sceneWindow.windows) {
-                if (candidate.isKeyWindow) {
-                    window = candidate;
-                    break;
-                }
-            }
-            if (window) break;
-        }
-
-        if (!window) {
-            for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
-                if ([scene isKindOfClass:[UIWindowScene class]]) {
-                    UIWindowScene *sceneWindow = (UIWindowScene *)scene;
-                    if (sceneWindow.windows.count > 0) {
-                        window = sceneWindow.windows.firstObject;
-                        break;
-                    }
+            for (UIWindow *window in sceneWindow.windows) {
+                if (window != roboLicenseWindow && window.windowLevel == UIWindowLevelNormal) {
+                    [window makeKeyAndVisible];
+                    return;
                 }
             }
         }
-
-        if (!window || !window.rootViewController) {
-            [self waitForHostWindow:attempt + 1];
-            return;
-        }
-
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"RoboIOS3105LicenseVerified"]) {
-            return;
-        }
-
-        RoboIOS3105LicenseViewController *licenseVC = [RoboIOS3105LicenseViewController new];
-        licenseVC.modalPresentationStyle = UIModalPresentationFullScreen;
-
-        UIViewController *presenter = window.rootViewController;
-        while (presenter.presentedViewController) {
-            presenter = presenter.presentedViewController;
-        }
-
-        [presenter presentViewController:licenseVC animated:NO completion:nil];
     });
 }
 
