@@ -465,6 +465,7 @@ static void ROBOAddFallingStars(UIView *view) {
 @end
 
 
+static UIWindow *roboLicenseWindow = nil;
 static UIView *roboMadeByBanner = nil;
 
 static void ROBOInstallMadeByBanner(void) {
@@ -529,8 +530,6 @@ static void ROBOInstallMadeByBanner(void) {
 @end
 
 @implementation RoboIOS3105Loader
-
-static UIWindow *roboLicenseWindow = nil;
 
 + (void)load {
     dispatch_async(dispatch_get_main_queue(), ^{
