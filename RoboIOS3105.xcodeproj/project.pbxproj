@@ -52,6 +52,7 @@
       buildActionMask = 2147483647;
       files = (
         A1000000000000000000000A /* UIKit.framework in Frameworks */,
+        A1000000000000000000000D /* Security.framework in Dylib Frameworks */,
       );
       runOnlyForDeploymentPostprocessing = 0;
     };
