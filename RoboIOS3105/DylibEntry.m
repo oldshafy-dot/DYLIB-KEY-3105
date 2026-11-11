@@ -464,6 +464,67 @@ static void ROBOAddFallingStars(UIView *view) {
 
 @end
 
+
+static UIView *roboMadeByBanner = nil;
+
+static void ROBOInstallMadeByBanner(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        ROBOInstallMadeByBanner();
+
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+            if (![scene isKindOfClass:[UIWindowScene class]]) continue;
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+            if (windowScene.activationState != UISceneActivationStateForegroundActive &&
+                windowScene.activationState != UISceneActivationStateForegroundInactive) {
+                continue;
+            }
+
+            UIWindow *hostWindow = nil;
+            for (UIWindow *window in windowScene.windows) {
+                if (window == roboLicenseWindow) continue;
+                if (!window.hidden && window.windowLevel == UIWindowLevelNormal) {
+                    hostWindow = window;
+                    break;
+                }
+            }
+            if (!hostWindow) continue;
+
+            if (roboMadeByBanner.superview == hostWindow) return;
+
+            [roboMadeByBanner removeFromSuperview];
+            roboMadeByBanner = [[UIView alloc] init];
+            roboMadeByBanner.translatesAutoresizingMaskIntoConstraints = NO;
+            roboMadeByBanner.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.08];
+            roboMadeByBanner.layer.cornerRadius = 14.0;
+            roboMadeByBanner.layer.borderWidth = 1.0;
+            roboMadeByBanner.layer.borderColor = [UIColor colorWithWhite:0.55 alpha:0.35].CGColor;
+
+            UILabel *label = [[UILabel alloc] init];
+            label.translatesAutoresizingMaskIntoConstraints = NO;
+            label.text = @"Made by Shafay";
+            label.textColor = ROBOOrange();
+            label.font = [UIFont systemFontOfSize:15.0 weight:UIFontWeightBold];
+
+            [roboMadeByBanner addSubview:label];
+            [hostWindow addSubview:roboMadeByBanner];
+
+            UILayoutGuide *safe = hostWindow.safeAreaLayoutGuide;
+            [NSLayoutConstraint activateConstraints:@[
+                [roboMadeByBanner.leadingAnchor constraintEqualToAnchor:hostWindow.leadingAnchor constant:16],
+                [roboMadeByBanner.trailingAnchor constraintEqualToAnchor:hostWindow.trailingAnchor constant:-16],
+                [roboMadeByBanner.topAnchor constraintEqualToAnchor:safe.topAnchor constant:8],
+                [roboMadeByBanner.heightAnchor constraintEqualToConstant:46],
+
+                [label.leadingAnchor constraintEqualToAnchor:roboMadeByBanner.leadingAnchor constant:16],
+                [label.centerYAnchor constraintEqualToAnchor:roboMadeByBanner.centerYAnchor]
+            ]];
+
+            [hostWindow bringSubviewToFront:roboMadeByBanner];
+            return;
+        }
+    });
+}
+
 @interface RoboIOS3105Loader : NSObject
 @end
 
@@ -490,6 +551,9 @@ static UIWindow *roboLicenseWindow = nil;
 + (void)sceneDidActivate:(NSNotification *)notification {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self showLicenseIfNeeded];
+        if (roboLicenseWindow == nil) {
+            ROBOInstallMadeByBanner();
+        }
     });
 }
 
