@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <Security/Security.h>
+#import <QuartzCore/QuartzCore.h>
 
 static NSString * const kLicenseService = @"ROBO-iOS-3105";
 static NSString * const kLicenseAccount = @"com.robomods.roboios3105.license";
@@ -67,6 +68,33 @@ static NSString *ROBOInstallationID(void) {
     return [[[UIDevice currentDevice] identifierForVendor] UUIDString] ?: @"";
 }
 
+static void ROBOAddFallingStars(UIView *view) {
+    CAEmitterLayer *emitter = [CAEmitterLayer layer];
+    emitter.name = @"ROBOFallingStars";
+    emitter.emitterShape = kCAEmitterLayerLine;
+    emitter.emitterMode = kCAEmitterLayerSurface;
+    emitter.emitterSize = CGSizeMake(view.bounds.size.width, 1.0);
+    emitter.emitterPosition = CGPointMake(view.bounds.size.width / 2.0, -2.0);
+
+    CAEmitterCell *cell = [CAEmitterCell emitterCell];
+    cell.birthRate = 8.0;
+    cell.lifetime = 7.0;
+    cell.velocity = 32.0;
+    cell.velocityRange = 18.0;
+    cell.emissionLongitude = (CGFloat)M_PI_2;
+    cell.emissionRange = 0.16;
+    cell.scale = 0.035;
+    cell.scaleRange = 0.018;
+    cell.alphaSpeed = -0.08;
+    cell.contents = (__bridge id)[UIImage systemImageNamed:@"circle.fill"].CGImage;
+    cell.color = (view.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark)
+        ? UIColor.whiteColor.CGColor
+        : UIColor.blackColor.CGColor;
+
+    emitter.emitterCells = @[cell];
+    [view.layer addSublayer:emitter];
+}
+
 @interface RoboIOS3105LicenseViewController : UIViewController <UITextFieldDelegate>
 @property(nonatomic,strong) UITextField *keyField;
 @property(nonatomic,strong) UIButton *verifyButton;
@@ -89,22 +117,22 @@ static NSString *ROBOInstallationID(void) {
     title.text = @"ROBO iOS";
     title.textAlignment = NSTextAlignmentCenter;
     title.textColor = ROBOOrange();
-    title.font = [UIFont systemFontOfSize:42 weight:UIFontWeightBlack];
+    title.font = [UIFont systemFontOfSize:46 weight:UIFontWeightHeavy];
 
     UILabel *version = [[UILabel alloc] init];
     version.translatesAutoresizingMaskIntoConstraints = NO;
     version.text = @"3105";
     version.textAlignment = NSTextAlignmentCenter;
     version.textColor = ROBOOrange();
-    version.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
+    version.font = [UIFont systemFontOfSize:19 weight:UIFontWeightBold];
 
     UILabel *notice = [[UILabel alloc] init];
     notice.translatesAutoresizingMaskIntoConstraints = NO;
-    notice.text = @"This 3105 is cracked by Shafay, owner of Robo Mods";
+    notice.text = @"This 3105 is made by Shafay, owner of Robo Mods";
     notice.textAlignment = NSTextAlignmentCenter;
     notice.numberOfLines = 0;
     notice.textColor = ROBOOrange();
-    notice.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    notice.font = [UIFont systemFontOfSize:15 weight:UIFontWeightSemibold];
 
     self.keyField = [[UITextField alloc] init];
     self.keyField.translatesAutoresizingMaskIntoConstraints = NO;
@@ -176,7 +204,15 @@ static NSString *ROBOInstallationID(void) {
     [self.view addSubview:self.spinner];
     [self.view addSubview:self.messageLabel];
     [self.view addSubview:self.statusLabel];
+    UILabel *compatibility = [[UILabel alloc] init];
+    compatibility.translatesAutoresizingMaskIntoConstraints = NO;
+    compatibility.text = @"Works on all iOS — even iOS 27.2";
+    compatibility.textAlignment = NSTextAlignmentCenter;
+    compatibility.numberOfLines = 0;
+    compatibility.textColor = ROBOOrange();
+    compatibility.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
     [self.view addSubview:self.channelButton];
+    [self.view addSubview:compatibility];
 
     UILayoutGuide *safe = self.view.safeAreaLayoutGuide;
 
@@ -212,11 +248,18 @@ static NSString *ROBOInstallationID(void) {
         [self.statusLabel.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-30],
         [self.statusLabel.topAnchor constraintEqualToAnchor:self.messageLabel.bottomAnchor constant:5],
 
+        [compatibility.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:30],
+        [compatibility.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-30],
+        [compatibility.topAnchor constraintEqualToAnchor:self.statusLabel.bottomAnchor constant:8],
+
         [self.channelButton.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:24],
         [self.channelButton.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-24],
-        [self.channelButton.topAnchor constraintEqualToAnchor:self.statusLabel.bottomAnchor constant:18],
-        [self.channelButton.heightAnchor constraintEqualToConstant:48]
+        [self.channelButton.topAnchor constraintEqualToAnchor:compatibility.bottomAnchor constant:14],
+        [self.channelButton.heightAnchor constraintEqualToConstant:50]
     ]];
+
+    [self.view layoutIfNeeded];
+    ROBOAddFallingStars(self.view);
 
     NSString *savedKey = ROBOKeychainRead(kLicenseAccount);
     if (savedKey.length > 0) {
