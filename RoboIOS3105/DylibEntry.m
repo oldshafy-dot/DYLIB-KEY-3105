@@ -5,7 +5,7 @@
 static NSString * const kLicenseService = @"ROBO-iOS-3105";
 static NSString * const kLicenseAccount = @"com.robomods.roboios3105.license";
 static NSString * const kInstallationAccount = @"com.robomods.roboios3105.installation-id";
-static NSString * const kProductIdentifier = @"3105";
+static NSString * const kProductIdentifier = @"vvvvvvvvvv";
 static NSString * const kVerifyURL = @"https://shafaykeyauthadmin.lovable.app/api/public/v1/verify-license";
 
 static UIColor *ROBOOrange(void) {
@@ -114,7 +114,7 @@ static void ROBOAddFallingStars(UIView *view) {
 
     UILabel *title = [[UILabel alloc] init];
     title.translatesAutoresizingMaskIntoConstraints = NO;
-    title.text = @"ROBO iOS";
+    title.text = @"iOS ESIGNE";
     title.textAlignment = NSTextAlignmentCenter;
     title.textColor = ROBOOrange();
     title.font = [UIFont systemFontOfSize:46 weight:UIFontWeightHeavy];
@@ -458,7 +458,7 @@ static void ROBOAddFallingStars(UIView *view) {
 - (void)openTelegram {
     NSURL *url = [NSURL URLWithString:@"https://t.me/roboios"];
     if (url) {
-        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/+MFbTlA2W7Vk4NmU1"] options:@{} completionHandler:nil];
     }
 }
 
