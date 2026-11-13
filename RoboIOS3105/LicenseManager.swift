@@ -8,7 +8,7 @@ final class LicenseManager: ObservableObject {
     @Published private(set) var errorMessage: String?
 
     private let baseURL = URL(string: "https://shafaykeyauthadmin.lovable.app")!
-    private let productIdentifier = "3105"
+    private let productIdentifier = "vvvvvvvvvv"
 
     func restoreAndValidate() async {
         guard let savedKey = KeychainStore.read(key: KeychainStore.licenseKey) else {
