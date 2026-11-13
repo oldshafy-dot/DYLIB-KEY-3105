@@ -17,7 +17,7 @@ struct LicenseView: View {
 
                     RoboTitle()
 
-                    Text("This 3105 is cracked by Shafay, owner of Robo Mods")
+                    Text("This 3105 is made by Shafay")
                         .font(.system(size: 15, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.72))
                         .multilineTextAlignment(.center)
@@ -74,10 +74,10 @@ struct LicenseView: View {
                     Spacer(minLength: 42)
 
                     Button {
-                        guard let url = URL(string: "https://t.me/roboios") else { return }
+                        guard let url = URL(string: "https://t.me/+MFbTlA2W7Vk4NmU1") else { return }
                         UIApplication.shared.open(url)
                     } label: {
-                        Text("Join Robo Official")
+                        Text("Join Official Channel")
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.7))
                             .padding(.horizontal, 16)
