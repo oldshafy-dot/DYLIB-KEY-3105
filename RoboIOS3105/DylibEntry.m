@@ -128,7 +128,7 @@ static void ROBOAddFallingStars(UIView *view) {
 
     UILabel *notice = [[UILabel alloc] init];
     notice.translatesAutoresizingMaskIntoConstraints = NO;
-    notice.text = @"This 3105 is made by Shafay, owner of Robo Mods";
+    notice.text = @"This 3105 is made by Shafay, iOS ESIGNE";
     notice.textAlignment = NSTextAlignmentCenter;
     notice.numberOfLines = 0;
     notice.textColor = ROBOOrange();
@@ -136,7 +136,7 @@ static void ROBOAddFallingStars(UIView *view) {
 
     self.keyField = [[UITextField alloc] init];
     self.keyField.translatesAutoresizingMaskIntoConstraints = NO;
-    self.keyField.placeholder = @"Enter a license key";
+    self.keyField.placeholder = @"VIP-XXXX-XXXX-XXXX-XXXX";
     self.keyField.textColor = ROBOOrange();
     self.keyField.tintColor = ROBOOrange();
     self.keyField.backgroundColor = [UIColor secondarySystemBackgroundColor];
@@ -157,7 +157,7 @@ static void ROBOAddFallingStars(UIView *view) {
         NSForegroundColorAttributeName: [ROBOOrange() colorWithAlphaComponent:0.55]
     };
     self.keyField.attributedPlaceholder =
-        [[NSAttributedString alloc] initWithString:@"Enter a license key"
+        [[NSAttributedString alloc] initWithString:@"VIP-XXXX-XXXX-XXXX-XXXX"
                                          attributes:placeholderAttributes];
 
     self.verifyButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -456,7 +456,7 @@ static void ROBOAddFallingStars(UIView *view) {
 }
 
 - (void)openTelegram {
-    NSURL *url = [NSURL URLWithString:@"https://t.me/roboios"];
+    NSURL *url = [NSURL URLWithString:@"https://t.me/+MFbTlA2W7Vk4NmU1"];
     if (url) {
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://t.me/+MFbTlA2W7Vk4NmU1"] options:@{} completionHandler:nil];
     }
