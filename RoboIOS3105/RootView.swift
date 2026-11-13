@@ -71,7 +71,7 @@ struct RoboTitle: View {
     private let roboOrange = Color(red: 1.0, green: 0.47, blue: 0.12)
 
     var body: some View {
-        Text("ROBO iOS")
+        Text("iOS ESIGNE")
             .foregroundStyle(roboOrange)
             .font(.system(size: 46, weight: .heavy, design: .rounded))
             .tracking(-1.0)
