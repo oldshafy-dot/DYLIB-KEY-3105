@@ -25,7 +25,7 @@ struct LicenseView: View {
                         .padding(.top, 18)
 
                     VStack(spacing: 12) {
-                        TextField("Enter a license key", text: $key)
+                        TextField("VIP-XXXX-XXXX-XXXX-XXXX", text: $key)
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                             .keyboardType(.asciiCapable)
